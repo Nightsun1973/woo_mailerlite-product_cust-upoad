@@ -1,0 +1,48 @@
+---
+description: Delta starter uplift when Development Control HEAD changes (C16)
+alwaysApply: true
+---
+
+# Starter uplift on workspace open (C16) — delta
+
+**Playbook:** `development/development-control/new-project-start.md`  
+**Marker (committed):** `.cursor/starter-state.json`  
+**Due flag (gitignored):** `.cursor/starter-uplift-due`
+
+Re-run the starter in **adopt/uplift** only when **Development Control has changed** (or the project never recorded a sync). Not a settings file-copy.
+
+## When it applies
+
+| Condition | Action |
+|-----------|--------|
+| `started: true` **and** `.cursor/starter-uplift-due` exists | First agent action: adopt/uplift (audit → apply **deltas only**) |
+| `started: true`, no due flag | Skip uplift — DC HEAD matches `lastDevControlHead` |
+| Marker missing | Full `new-project-start.md` before feature work, or ask Lee once |
+
+Hooks compare `lastDevControlHead` in starter-state to `git rev-parse HEAD` in `{devRoot}/development-control`. Flag only on missing/mismatch (or HEAD unreadable).
+
+**Exception:** the `development-control` repo itself does **not** auto-flag on every commit (would uplift on each push). Lee/agents uplift it explicitly when changing the starter.
+
+## How to run the open uplift
+
+1. Read `.cursor/starter-state.json` (reuse `kind` / `devRoot` — do not re-ask Work vs Private unless missing).
+2. Run `new-project-start.md` **Adopt / uplift** — **audit first**, only change what is missing/outdated.
+3. Ask Lee when the playbook requires it.
+4. When done (or nothing to change):
+   - delete `.cursor/starter-uplift-due`
+   - set `"lastUpliftAt"` ISO
+   - set `"lastDevControlHead"` to current development-control `git rev-parse HEAD`
+   - commit/push if tracked files changed (C1-A)
+5. Decision needed → **Needs decision**; do not start feature work.
+
+## Order at session start
+
+1. **C16** — uplift only if due flag present (or never started).  
+2. **C15** — read `docs/ongoing-work-log.md` when present (**mandatory** before planning/coding).  
+3. User request / secretary / PM.
+
+## Do not
+
+- Do not full-uplift every workspace open when DC is unchanged.  
+- Do not skip uplift when the due flag is present.  
+- Do not commit `.cursor/starter-uplift-due`.

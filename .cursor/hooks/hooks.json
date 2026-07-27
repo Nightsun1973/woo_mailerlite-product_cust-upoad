@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "workspaceOpen": [
+      {
+        "command": ".cursor/hooks/flag-starter-uplift.cmd",
+        "timeout": 30
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/flag-starter-uplift.cmd",
+        "timeout": 30
+      }
+    ]
+  }
+}

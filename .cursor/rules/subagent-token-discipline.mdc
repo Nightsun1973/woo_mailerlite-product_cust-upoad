@@ -1,0 +1,59 @@
+---
+description: Sub-agents are context tools; bounded scouts; implement in main thread (C18)
+alwaysApply: true
+---
+
+# Sub-agent token discipline (C18)
+
+**Goal:** lower Cursor token use, faster loops, fewer wrong turns. Do **not** ban sub-agents — **re-scope** them.
+
+## Core rules
+
+1. **Sub-agents = context tool**, not labour-split. Research / explore / audit → **short summary** to parent.
+2. **Write, edit, debug, commit** in the **parent/main thread** (Composer-pool).
+3. **Never** cold-start a new implementer per failed attempt. Retry in-thread or **resume** the same agent with failure notes.
+4. If a sub-agent must implement (rare): **resumable** only; pass prior errors; no re-explore from zero.
+5. **Never Auto**; **Composer-pool only** (C4). No API-pool implementer sub-agents.
+
+## Bounded scout briefs (mandatory shape)
+
+Scout/Task prompts must include:
+
+```text
+Paths (max 3): …
+Goal: …
+Return: ≤15 lines — findings + file refs only. No code dumps. No implementation.
+```
+
+- Prefer **one** focused scout; parallel scouts **only** when scopes are independent and non-overlapping.
+- After scout returns: **parent implements immediately** — do not open another implementer agent for the same work.
+
+## Resume with failure notes
+
+When resuming or retrying:
+
+```text
+Previous attempt failed because: …
+Already tried: …
+Do not re-read whole repo — use prior summary + these paths: …
+```
+
+## Do / Don’t
+
+| Do | Don’t |
+|----|--------|
+| Scout → ≤15-line summary → parent implements | New implementer sub-agent every retry |
+| Resume with failure notes | Cold-start that re-derives the same understanding |
+| Sequential scout when dependent | Parallel overlapping explores |
+| Small, testable parent edits | Split every file across new Tasks |
+
+## PM / parent
+
+- Prefer scout briefs over implementer labour-splits.
+- Token discipline overrides “always delegate implementation to specialists.”
+- Keep milestones small so parent context stays accurate (see orchestration / PM).
+- **Loop escape (C4):** after 2+ failures on the same issue on the cheap model, one escalated attempt on next-cheapest Composer-pool model, then **revert** to cheap default.
+
+## Related
+
+- **C4** models (cheapest default + loop escape) · **C7** roster · **C15** work log · **C16** delta uplift  

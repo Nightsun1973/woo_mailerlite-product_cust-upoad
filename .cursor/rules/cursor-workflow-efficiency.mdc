@@ -1,0 +1,45 @@
+---
+description: Cost/speed/accuracy habits for Cursor agents (C19)
+alwaysApply: true
+---
+
+# Cursor workflow efficiency (C19)
+
+Complements **C18** (sub-agents) and **C15** (work log). Apply on every session.
+
+## Session start (order)
+
+1. C16 delta uplift if due.  
+2. **Read** `docs/ongoing-work-log.md` when present — state one line (milestone / blocker / next).  
+3. Then the user task.
+
+Do not rediscover project state from a full-tree walk when the work log answers it.
+
+## Cost
+
+- Bounded scouts (C18).  
+- Small milestones and small diffs.  
+- Delta uplift only when Development Control HEAD changes (C16).  
+- Prefer rules/docs for secrets paths and conventions — do not re-search known locations.
+- **`powershell-commands.md`:** Lee runs commands manually from the project root doc when possible; agents **must** update that file when they add or change `.ps1` / root `.cmd` (same commit — C15).
+
+## Speed
+
+- After a scout summary, **parent implements in the same turn** when possible.  
+- Parallel scouts only for independent scopes.  
+- Ask clarifying questions **early** when intent is ambiguous — cheaper than wrong builds.
+
+## Accuracy
+
+- **Gate = runnable evidence** before “stage passed”: command/test/script output, or explicit N/A with reason. No vibe-only passes.  
+- **Sources of truth:** ongoing work log + `project-registry.json` (control plane) + repo Git state — not chat memory alone.  
+- On failure: record what was tried in the brief/resume note before the next attempt.  
+- Update the work log when milestone/blocker/next changes (C15).
+
+## PM stage-pass shape
+
+```text
+M# <stage> — passed
+Evidence: <command + result summary, or N/A: …>
+Next: <next stage>
+```

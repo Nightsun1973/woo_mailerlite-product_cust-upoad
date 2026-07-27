@@ -1,0 +1,76 @@
+---
+description: Session continuity — auto-read ongoing work log, continuous doc updates, commit-time sync (C15)
+alwaysApply: true
+---
+
+# Session continuity and project documentation (C15)
+
+**Templates:** `development/development-control/templates/` (`ongoing-work-log.md.example`, etc.)  
+**Playbook:** `development/development-control/new-project-start.md` (doc scaffold phase)  
+**Design:** `development/development-control/reports/session-continuity-design-2026-07-23.md`
+
+Any AI or human must be able to pick up work from **version-controlled docs** — not chat history alone.
+
+## Documentation set (per product project)
+
+| Type | Default path |
+|------|----------------|
+| Ongoing work log | `docs/ongoing-work-log.md` |
+| Index | `docs/README.md` |
+| Technical | `docs/technical/overview.md` |
+| Admin | `docs/admin/overview.md` |
+| User | `docs/user/overview.md` |
+| PowerShell commands | `powershell-commands.md` (project root) |
+
+Optional override: `docs/.continuity.json` → `{ "ongoing_work_log": "…" }`.
+
+Work with existing docs (`README.md`, `PROJECT-STATUS.md`, product registers) — **index and cross-link**; do not duplicate long registers in the work log.
+
+**PowerShell command doc (mandatory):** Every project keeps **`powershell-commands.md`** at the repo root — manual run cheat sheet (saves Cursor tokens). Generator: `development-control/scripts/Update-ProjectPowerShellCommands.ps1`.
+
+## Session start
+
+0. **C16 first** — if `.cursor/starter-uplift-due` exists (DC HEAD changed / never synced) or the project was never started, run `new-project-start.md` in adopt/uplift (or full start) **before** other work. See `starter-uplift-on-open.mdc`.
+1. Resolve work log path (override → default).
+2. **If log exists** → **read it** before earnest work (no prompt). Treat as source of truth with registry/Git (C19). Skim linked docs if the log references stale dates or active programmes. State one line: active milestone / blocker / recommended next action.
+3. **If log missing** → ask Lee **once** whether to create/seed from `PROJECT-STATUS.md`, `README.md`, `reports/`, or legacy handoff files. **Stop and wait** before other work. On approval, copy templates from Development Control and seed the log.
+
+No end-of-session handoff flag — update the log **continuously** during work.
+
+## Commit-time documentation sync (extends C1-A)
+
+When shipping a **logical unit** (Lee authorises commit/push):
+
+1. Code/config changes complete.
+2. **Version bump** where the project uses versioning (`VERSION`, `version.json`, plugin header, etc.).
+3. **Changelog entry** where the project requires it (never version bump without changelog when that rule applies).
+4. Update **`docs/ongoing-work-log.md`** (snapshot, programmes, next steps).
+5. Update **affected** technical / admin / user docs — **same commit**.
+6. If the unit **adds or materially changes** any `.ps1` or root `.cmd`: update **`powershell-commands.md`** (re-run `Update-ProjectPowerShellCommands.ps1 -ProjectPath '…'` or edit the table; include `.SYNOPSIS` on new scripts).
+7. Commit → push via `onedrive-dev-sync.ps1 -AroundGit` (C10).
+8. `git status` clean.
+
+Do **not** leave code shipped with stale documentation.
+
+## Pre-push checklist (canonical — reference from other rules)
+
+- [ ] Version bumped (if applicable) + changelog entry
+- [ ] `docs/ongoing-work-log.md` updated
+- [ ] Affected technical / admin / user docs updated
+- [ ] `powershell-commands.md` updated when `.ps1` / root `.cmd` changed
+- [ ] Committed and pushed (C1-A); `git status` clean
+
+## Legacy handoff files
+
+Projects may still have `docs/HANDOFF.md` or `docs/admin/development/agent-handoff.md`. Do **not** rename or delete without Lee approval. On uplift, seed `docs/ongoing-work-log.md` from legacy content; link from `docs/README.md`.
+
+## Infrastructure repos
+
+**development-control** and other non-shipping infrastructure: use the same pattern when `docs/ongoing-work-log.md` exists; dogfood per programme plan.
+
+## Agent behaviour
+
+- Read the work log at session start when present — before planning, coding, or delegating (unless Lee says skip).
+- Update the log as decisions, milestones, and blockers change — not only at session end.
+- When **creating or materially changing** a PowerShell script (`.ps1`) or root `.cmd`, update **`powershell-commands.md`** in the same logical unit — re-run `development-control/scripts/Update-ProjectPowerShellCommands.ps1 -ProjectPath '<project>'` or edit the table; add `.SYNOPSIS` to new scripts.
+- Ask in Cursor chat while waiting for Lee on missing log; Teams only after a unit finishes if Lee must act (C13).
