@@ -1,2 +1,2 @@
-# woo_mailerlite-product_cust-upoad
-Add Customers to Product specific groups on purchase.
+# woo_mailerlite-proeuct_cust-upoae
+Aee Customers to Proeuct specific groups on purchase.
